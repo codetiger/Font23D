@@ -16,6 +16,8 @@
 using namespace std;
 using namespace p2t;
 
+int USE_OPENGL = 0;
+
 struct Vector3df
 {
 	float x, y, z;
@@ -34,10 +36,10 @@ GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};  /* Infinite light location. */
 void initGL(void)
 {
 	/* Enable a single OpenGL light. */
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
+	// glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	// glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	// glEnable(GL_LIGHT0);
+	// glEnable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
 
 	glMatrixMode(GL_PROJECTION);
@@ -72,6 +74,74 @@ vector<p2t::Point*> triangulateContour(Vectoriser *vectoriser, int c, float offs
 	}
 	return polyline;
 }
+
+void beginCallback(GLenum which)
+{
+	printf("Unknown tesselasion enum: %d\n", which);
+	glBegin(GL_TRIANGLES);
+}
+
+void endCallback(void)
+{
+	glEnd();
+}
+
+void flagCallback( GLboolean ) 
+{
+
+}
+
+void errorCallback(GLenum errorCode)
+{
+   const GLubyte *estring;
+
+   estring = gluErrorString(errorCode);
+   fprintf (stderr, "Tessellation Error: %s\n", estring);
+}
+
+static int count = 0;
+static Tri t;
+
+void vertexCallback(GLvoid *vertex)
+{
+	const GLdouble *d;
+	d = (GLdouble *) vertex;
+
+	if(count == 0) {
+		t.a.x = d[0];
+		t.a.y = d[1];
+		t.a.z = d[2];
+		count++;
+	} else if(count == 1) {
+		t.c.x = d[0];
+		t.c.y = d[1];
+		t.c.z = d[2];
+		count++;
+	} else if(count == 2) {
+		t.b.x = d[0];
+		t.b.y = d[1];
+		t.b.z = d[2];
+		tris.push_back(t);
+		count = 0;
+		printf("Creating triangles\n");
+	}
+}
+
+void combineCallback(GLdouble coords[3], GLdouble *vertex_data[4], GLfloat weight[4], GLdouble **dataOut)
+{
+	printf("combineCallback\n");
+	GLdouble *vertex;
+	int i;
+
+	vertex = (GLdouble *) malloc(6 * sizeof(GLdouble));
+	vertex[0] = coords[0];
+	vertex[1] = coords[1];
+	vertex[2] = coords[2];
+	for (i = 3; i < 7; i++)
+		vertex[i] = weight[0] * vertex_data[0][i] + weight[1] * vertex_data[1][i] + weight[2] * vertex_data[2][i] + weight[3] * vertex_data[3][i];
+	*dataOut = vertex;
+}
+
 
 float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offset, float extrude) {
     static FT_UInt prevCharIndex = 0, curCharIndex = 0;
@@ -142,45 +212,81 @@ float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offs
 		}
 
 		if(contour->GetDirection()) {
-		    vector<p2t::Point*> polyline = triangulateContour(vectoriser, c, offset);
-		    CDT* cdt = new CDT(polyline);
 
-			for(size_t cm = 0; cm < vectoriser->ContourCount(); ++cm) {
-				const Contour* sm = vectoriser->GetContour(cm);
-				if(c != cm && !sm->GetDirection() && sm->IsInside(contour)) {
-				    vector<p2t::Point*> pl = triangulateContour(vectoriser, cm, offset);
-				    cdt->AddHole(pl);
+		    if(USE_OPENGL) {
+				GLUtesselator* tobj = gluNewTess();
+
+				gluTessCallback(tobj, GLU_TESS_VERTEX, (GLvoid (*) ()) &vertexCallback);
+				gluTessCallback(tobj, GLU_TESS_BEGIN, (GLvoid (*) ()) &beginCallback);
+				gluTessCallback(tobj, GLU_TESS_END, (GLvoid (*) ()) &endCallback);
+				gluTessCallback(tobj, GLU_TESS_ERROR, (GLvoid (*) ()) &errorCallback);
+				gluTessCallback(tobj, GLU_TESS_COMBINE, (GLvoid (*) ()) &combineCallback);
+			    gluTessCallback(tobj, GLU_TESS_EDGE_FLAG, (GLvoid (*) ()) &flagCallback);
+
+				gluTessProperty(tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
+
+				gluTessProperty(tobj, GLU_TESS_TOLERANCE, 0);
+				gluTessNormal(tobj, 0.0f, 0.0f, 0.0f);
+
+				gluTessBeginPolygon(tobj, NULL);
+				for(size_t c = 0; c < vectoriser->ContourCount(); ++c) {
+					const Contour* contour = vectoriser->GetContour(c);
+					gluTessBeginContour(tobj);
+					for(size_t p = 0; p < contour->PointCount(); ++p) {
+						const double* d1 = contour->GetPoint(p);
+						double *d = new double[3];
+						d[0] = d1[0] / 64.0f + offset;
+						d[1] = d1[1] / 64.0f;
+						d[2] = d1[2] / 64.0f;
+						gluTessVertex(tobj, (GLdouble *)d, (GLvoid *)d);
+					}
+
+					gluTessEndContour(tobj);
 				}
-			}
+				gluTessEndPolygon(tobj);
 
-		    cdt->Triangulate();
-		    vector<Triangle*> ts = cdt->GetTriangles();
-		    for(int i = 0; i < ts.size(); i++) {
-		    	Triangle* ot = ts[i];
+		    } else {
+			    vector<p2t::Point*> polyline = triangulateContour(vectoriser, c, offset);
+			    CDT* cdt = new CDT(polyline);
 
-		    	Tri t1;
-		    	t1.a.x = ot->GetPoint(0)->x;
-		    	t1.a.y = ot->GetPoint(0)->y;
-		    	t1.a.z = 0.0f;
-		    	t1.b.x = ot->GetPoint(1)->x;
-		    	t1.b.y = ot->GetPoint(1)->y;
-		    	t1.b.z = 0.0f;
-		    	t1.c.x = ot->GetPoint(2)->x;
-		    	t1.c.y = ot->GetPoint(2)->y;
-		    	t1.c.z = 0.0f;
-		    	tris.push_back(t1);
+				for(size_t cm = 0; cm < vectoriser->ContourCount(); ++cm) {
+					const Contour* sm = vectoriser->GetContour(cm);
+					if(c != cm && !sm->GetDirection() && sm->IsInside(contour)) {
+					    vector<p2t::Point*> pl = triangulateContour(vectoriser, cm, offset);
+					    cdt->AddHole(pl);
+					}
+				}
 
-		    	Tri t2;
-		    	t2.a.x = ot->GetPoint(0)->x;
-		    	t2.a.y = ot->GetPoint(0)->y;
-		    	t2.a.z = extrude;
-		    	t2.b.x = ot->GetPoint(1)->x;
-		    	t2.b.y = ot->GetPoint(1)->y;
-		    	t2.b.z = extrude;
-		    	t2.c.x = ot->GetPoint(2)->x;
-		    	t2.c.y = ot->GetPoint(2)->y;
-		    	t2.c.z = extrude;
-		    	tris.push_back(t2);
+			    cdt->Triangulate();
+			    vector<Triangle*> ts = cdt->GetTriangles();
+			    for(int i = 0; i < ts.size(); i++) {
+			    	Triangle* ot = ts[i];
+
+			    	Tri t1;
+			    	t1.a.x = ot->GetPoint(0)->x;
+			    	t1.a.y = ot->GetPoint(0)->y;
+			    	t1.a.z = 0.0f;
+			    	t1.b.x = ot->GetPoint(1)->x;
+			    	t1.b.y = ot->GetPoint(1)->y;
+			    	t1.b.z = 0.0f;
+			    	t1.c.x = ot->GetPoint(2)->x;
+			    	t1.c.y = ot->GetPoint(2)->y;
+			    	t1.c.z = 0.0f;
+			    	tris.push_back(t1);
+
+			    	Tri t2;
+			    	t2.a.x = ot->GetPoint(0)->x;
+			    	t2.a.y = ot->GetPoint(0)->y;
+			    	t2.a.z = extrude;
+			    	t2.b.x = ot->GetPoint(1)->x;
+			    	t2.b.y = ot->GetPoint(1)->y;
+			    	t2.b.z = extrude;
+			    	t2.c.x = ot->GetPoint(2)->x;
+			    	t2.c.y = ot->GetPoint(2)->y;
+			    	t2.c.z = extrude;
+			    	tris.push_back(t2);
+			    }
+			    delete cdt;
 		    }
 		}
 	}
