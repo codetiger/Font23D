@@ -113,6 +113,34 @@ float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offs
 	for(size_t c = 0; c < vectoriser->ContourCount(); ++c) {
 		const Contour* contour = vectoriser->GetContour(c);
 
+		for(size_t p = 0; p < contour->PointCount() - 1; ++p) {
+			const double* d1 = contour->GetPoint(p);
+			const double* d2 = contour->GetPoint(p + 1);
+	    	Tri t1;
+	    	t1.a.x = (d1[0]/64.0f) + offset;
+			t1.a.y = d1[1]/64.0f;
+			t1.a.z = 0.0f;
+	    	t1.b.x = (d2[0]/64.0f) + offset;
+			t1.b.y = d2[1]/64.0f;
+			t1.b.z = 0.0f;
+	    	t1.c.x = (d1[0]/64.0f) + offset;
+			t1.c.y = d1[1]/64.0f;
+			t1.c.z = extrude;
+	    	tris.push_back(t1);
+
+	    	Tri t2;
+	    	t2.a.x = (d1[0]/64.0f) + offset;
+			t2.a.y = d1[1]/64.0f;
+			t2.a.z = extrude;
+	    	t2.b.x = (d2[0]/64.0f) + offset;
+			t2.b.y = d2[1]/64.0f;
+			t2.b.z = extrude;
+	    	t2.c.x = (d2[0]/64.0f) + offset;
+			t2.c.y = d2[1]/64.0f;
+			t2.c.z = 0.0f;
+	    	tris.push_back(t2);
+		}
+
 		if(contour->GetDirection()) {
 		    vector<p2t::Point*> polyline = triangulateContour(vectoriser, c, offset);
 		    CDT* cdt = new CDT(polyline);
@@ -123,34 +151,6 @@ float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offs
 				    vector<p2t::Point*> pl = triangulateContour(vectoriser, cm, offset);
 				    cdt->AddHole(pl);
 				}
-			}
-
-			for(size_t p = 0; p < contour->PointCount() - 1; ++p) {
-				const double* d1 = contour->GetPoint(p);
-				const double* d2 = contour->GetPoint(p + 1);
-		    	Tri t1;
-		    	t1.a.x = (d1[0]/64.0f) + offset;
-				t1.a.y = d1[1]/64.0f;
-				t1.a.z = 0.0f;
-		    	t1.b.x = (d2[0]/64.0f) + offset;
-				t1.b.y = d2[1]/64.0f;
-				t1.b.z = 0.0f;
-		    	t1.c.x = (d1[0]/64.0f) + offset;
-				t1.c.y = d1[1]/64.0f;
-				t1.c.z = extrude;
-		    	tris.push_back(t1);
-
-		    	Tri t2;
-		    	t2.a.x = (d1[0]/64.0f) + offset;
-				t2.a.y = d1[1]/64.0f;
-				t2.a.z = extrude;
-		    	t2.b.x = (d2[0]/64.0f) + offset;
-				t2.b.y = d2[1]/64.0f;
-				t2.b.z = extrude;
-		    	t2.c.x = (d2[0]/64.0f) + offset;
-				t2.c.y = d2[1]/64.0f;
-				t2.c.z = 0.0f;
-		    	tris.push_back(t2);
 			}
 
 		    cdt->Triangulate();
@@ -198,7 +198,6 @@ int main(int argc, char **argv) {
 	char* str = argv[2];
 	unsigned short bezierSteps = atoi(argv[4]);
 	float extrude = atof(argv[5]);
-	printf("Extrude: %f\n", extrude);
 
     FT_Library library;
     if (FT_Init_FreeType( &library ))
@@ -215,6 +214,13 @@ int main(int argc, char **argv) {
        	offset = AddCharacter(face, str[i], bezierSteps, offset, extrude);
     }
 
+    // Debug Info
+    printf("Point Count: %d\n", (int)tris.size());
+	for (int i = 0; i < tris.size(); i++) {
+		Tri t = tris[i];
+	}
+
+	// Draw
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutCreateWindow("Font to 3D");
