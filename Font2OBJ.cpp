@@ -30,16 +30,16 @@ struct Tri
 
 vector<Tri> tris;
 
-GLfloat light_diffuse[] = {0.0, 1.0, 0.0, 1.0};  /* Red diffuse light. */
+GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};  /* Red diffuse light. */
 GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};  /* Infinite light location. */
 
 void initGL(void)
 {
 	/* Enable a single OpenGL light. */
-	// glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	// glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-	// glEnable(GL_LIGHT0);
-	// glEnable(GL_LIGHTING);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
 
 	glMatrixMode(GL_PROJECTION);
