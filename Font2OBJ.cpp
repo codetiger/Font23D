@@ -41,6 +41,10 @@ void initGL(void)
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_DEPTH_TEST);
+	
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	glFrontFace(GL_CW); 
 
 	glMatrixMode(GL_PROJECTION);
 	gluPerspective( /* field of view in degree */ 40.0, /* aspect ratio */ 1.0,	/* Z near */ 1.0, /* Z far */ 1000.0);
@@ -198,16 +202,17 @@ float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offs
 			t1.c.z = extrude;
 	    	tris.push_back(t1);
 
-	    	Tri t2;
-	    	t2.a.x = (d1[0]/64.0f) + offset;
-			t2.a.y = d1[1]/64.0f;
-			t2.a.z = extrude;
-	    	t2.b.x = (d2[0]/64.0f) + offset;
-			t2.b.y = d2[1]/64.0f;
-			t2.b.z = extrude;
-	    	t2.c.x = (d2[0]/64.0f) + offset;
-			t2.c.y = d2[1]/64.0f;
-			t2.c.z = 0.0f;
+            Tri t2;
+            t2.a.x = (d1[0]/64.0f) + offset;
+            t2.a.y = d1[1]/64.0f;
+            t2.a.z = extrude;
+            t2.c.x = (d2[0]/64.0f) + offset;
+            t2.c.y = d2[1]/64.0f;
+            t2.c.z = extrude;
+            t2.b.x = (d2[0]/64.0f) + offset;
+            t2.b.y = d2[1]/64.0f;
+            t2.b.z = 0.0f;
+
 	    	tris.push_back(t2);
 		}
 
@@ -275,11 +280,11 @@ float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offs
 			    	tris.push_back(t1);
 
 			    	Tri t2;
-			    	t2.a.x = ot->GetPoint(0)->x;
-			    	t2.a.y = ot->GetPoint(0)->y;
+			    	t2.a.x = ot->GetPoint(1)->x;
+			    	t2.a.y = ot->GetPoint(1)->y;
 			    	t2.a.z = extrude;
-			    	t2.b.x = ot->GetPoint(1)->x;
-			    	t2.b.y = ot->GetPoint(1)->y;
+			    	t2.b.x = ot->GetPoint(0)->x;
+			    	t2.b.y = ot->GetPoint(0)->y;
 			    	t2.b.z = extrude;
 			    	t2.c.x = ot->GetPoint(2)->x;
 			    	t2.c.y = ot->GetPoint(2)->y;
