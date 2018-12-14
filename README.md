@@ -25,3 +25,6 @@ Instruction to use:
 Plans for Future:
 * Allow Option to export the Mesh into OBJ file.
 * Add Support for Unicode text.
+
+Contributions:
+* Thanks to J.Scheurich from [White Dune Project](http://wdune.ourproject.org/) for suggesting fixes for Face culling.
