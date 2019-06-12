@@ -13,7 +13,6 @@
 #include "ftgl/Vectoriser.h"
 #include "poly2tri/poly2tri.h"
 
-using namespace std;
 using namespace p2t;
 
 int USE_OPENGL = 0;
@@ -28,7 +27,7 @@ struct Tri
 	Vector3df a, b, c;
 };
 
-vector<Tri> tris;
+std::vector<Tri> tris;
 
 GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};  /* Red diffuse light. */
 GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};  /* Infinite light location. */
@@ -55,7 +54,7 @@ void initGL(void)
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glRotatef(0.5f, 0.5f, 1.0f, 0.0f);
+	glRotatef(1.0f, 0.0f, 0.0f, 0.0f);
 
 	for (int i = 0; i < tris.size(); i++) {
 		Tri t = tris[i];
@@ -69,8 +68,8 @@ void display(void)
     glutPostRedisplay();
 }
 
-vector<p2t::Point*> triangulateContour(Vectoriser *vectoriser, int c, float offset) {
-	vector<p2t::Point*> polyline;
+std::vector<p2t::Point*> triangulateContour(Vectoriser *vectoriser, int c, float offset) {
+	std::vector<p2t::Point*> polyline;
 	const Contour* contour = vectoriser->GetContour(c);
 	for(size_t p = 0; p < contour->PointCount(); ++p) {
 		const double* d = contour->GetPoint(p);
@@ -251,19 +250,19 @@ float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offs
 				gluTessEndPolygon(tobj);
 
 		    } else {
-			    vector<p2t::Point*> polyline = triangulateContour(vectoriser, c, offset);
+			    std::vector<p2t::Point*> polyline = triangulateContour(vectoriser, c, offset);
 			    CDT* cdt = new CDT(polyline);
 
 				for(size_t cm = 0; cm < vectoriser->ContourCount(); ++cm) {
 					const Contour* sm = vectoriser->GetContour(cm);
 					if(c != cm && !sm->GetDirection() && sm->IsInside(contour)) {
-					    vector<p2t::Point*> pl = triangulateContour(vectoriser, cm, offset);
+					    std::vector<p2t::Point*> pl = triangulateContour(vectoriser, cm, offset);
 					    cdt->AddHole(pl);
 					}
 				}
 
 			    cdt->Triangulate();
-			    vector<Triangle*> ts = cdt->GetTriangles();
+			    std::vector<Triangle*> ts = cdt->GetTriangles();
 			    for(int i = 0; i < ts.size(); i++) {
 			    	Triangle* ot = ts[i];
 
@@ -334,9 +333,17 @@ int main(int argc, char **argv) {
 	// Draw
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+
+	glutInitWindowSize (1024, 640);
+	glutInitWindowPosition (100, 100);
+
 	glutCreateWindow("Font to 3D");
 	glutDisplayFunc(display);
 	initGL();
+
+	glTranslatef(-100.0f, 0.0f, 0.0f);
+	glRotatef(0.0f, 1.0f, 0.0f, 0.0f);
+
 	glutMainLoop();
 }
 
