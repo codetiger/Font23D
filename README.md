@@ -12,8 +12,12 @@ Now just run the bash script to get the 3d preview.
 ```sh
 sh compile.sh
 ```
-You should be seeing this 
-![Screenshot Font23D](screenshot-font23d.jpg)
+
+## Sample Outputs
+Below outputs are generated using different fonts
+![Screenshot Font23D with Coolveticarg Font](screenshots/coolveticarg.gif)
+![Screenshot Font23D with HP Font](screenshots/hp-font.gif)
+![Screenshot Font23D with Hursheys Font](screenshots/hursheys.gif)
 
 Instruction to use:
 * The Library uses FreeType Library to decode the fonts and converts the Text into Vector.
