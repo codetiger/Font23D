@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <codecvt>
+#include <locale>
 
 #include <GL/glut.h>
 
@@ -146,7 +148,7 @@ void combineCallback(GLdouble coords[3], GLdouble *vertex_data[4], GLfloat weigh
 }
 
 
-float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offset, float extrude) {
+float AddCharacter(FT_Face face, FT_ULong ch, unsigned short bezierSteps, float offset, float extrude) {
     static FT_UInt prevCharIndex = 0, curCharIndex = 0;
 	static FT_Pos  prev_rsb_delta = 0;
 
@@ -305,7 +307,8 @@ float AddCharacter(FT_Face face, char ch, unsigned short bezierSteps, float offs
 
 int main(int argc, char **argv) {
 	int height = atoi(argv[3]);
-	char* str = argv[2];
+	char* strUtf8 = argv[2];
+	const auto str = std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>{}.from_bytes(strUtf8);
 	unsigned short bezierSteps = atoi(argv[4]);
 	float extrude = atof(argv[5]);
 
@@ -320,7 +323,7 @@ int main(int argc, char **argv) {
     FT_Set_Char_Size( face, height << 6, height << 6, 96, 96);
 
    	float offset = 0; 
-    for(int i = 0; i < strlen(str); i++) {
+    for(int i = 0; i < str.size(); i++) {
        	offset = AddCharacter(face, str[i], bezierSteps, offset, extrude);
     }
 
