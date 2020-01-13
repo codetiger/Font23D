@@ -308,7 +308,7 @@ float AddCharacter(FT_Face face, FT_ULong ch, unsigned short bezierSteps, float 
 int main(int argc, char **argv) {
 	int height = atoi(argv[3]);
 	char* strUtf8 = argv[2];
-	const auto str = std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>{}.from_bytes(strUtf8);
+	const auto str = std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>().from_bytes(strUtf8);
 	unsigned short bezierSteps = atoi(argv[4]);
 	float extrude = atof(argv[5]);
 
