@@ -16,7 +16,7 @@ sh compile.sh
 ## Sample Outputs
 Below outputs are generated using different fonts
 ![Screenshot Font23D with Coolveticarg Font](screenshots/coolveticarg.png)
-![Screenshot Font23D with HP Font](screenshots/hp-font.png)
+![Screenshot Font23D with HP Font](screenshots/hp.png)
 ![Screenshot Font23D with Hursheys Font](screenshots/hursheys.png)
 
 Instruction to use:
