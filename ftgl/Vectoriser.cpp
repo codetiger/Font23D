@@ -29,21 +29,18 @@
 
 namespace ftgl {
 
-Vectoriser::Vectoriser(const FT_GlyphSlot glyph, unsigned short bezierSteps)
+Vectoriser::Vectoriser(const FT_Outline ol, unsigned short bezierSteps, bool reverse)
 :   contourList(0),
     ftContourCount(0),
     contourFlag(0)
 {
-    if(glyph)
-    {
-        outline = glyph->outline;
-
-        ftContourCount = outline.n_contours;
-        contourList = 0;
-        contourFlag = outline.flags;
-
-        ProcessContours(bezierSteps);
-    }
+    outline = ol;
+    
+    ftContourCount = outline.n_contours;
+    contourList = 0;
+    contourFlag = outline.flags;
+    
+    ProcessContours(bezierSteps, reverse);
 }
 
 
@@ -58,7 +55,7 @@ Vectoriser::~Vectoriser()
 }
 
 
-void Vectoriser::ProcessContours(unsigned short bezierSteps)
+void Vectoriser::ProcessContours(unsigned short bezierSteps, bool reverse)
 {
     short contourLength = 0;
     short startIndex = 0;
@@ -75,11 +72,15 @@ void Vectoriser::ProcessContours(unsigned short bezierSteps)
         contourLength =  (endIndex - startIndex) + 1;
 
         Contour* contour = new Contour(pointList, tagList, contourLength, bezierSteps);
+        if(reverse)
+            contour->Reverse();
 
         contourList[i] = contour;
 
         startIndex = endIndex + 1;
     }
+
+    return; //INFO (Harishankar): The following code gives inconsistent point count on scaling the font for bevel.
 
     // Compute each contour's parity. FIXME: see if FT_Outline_Get_Orientation
     // can do it for us.

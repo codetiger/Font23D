@@ -126,6 +126,30 @@ Point Contour::ComputeOutsetPoint(Point A, Point B, Point C)
                    tmp.X() * -ba.Y() + tmp.Y() * -ba.X());
 }
 
+void Contour::Reverse() {
+    size_t size = PointCount();
+
+    for(size_t i = 0; i < size / 2; i++)
+    {
+        Point tmp = pointList[i];
+        pointList[i] = pointList[size - 1 - i];
+        pointList[size - 1 -i] = tmp;
+    }
+    clockwise = !clockwise;
+
+    Point vOutset;
+    for(size_t i = 0; i < size; i++)
+    {
+        size_t prev, cur, next;
+        
+        prev = (i + size - 1) % size;
+        cur = i;
+        next = (i + size + 1) % size;
+        
+        vOutset = ComputeOutsetPoint(GetPoint(prev), GetPoint(cur), GetPoint(next));
+        AddOutsetPoint(vOutset);
+    }
+}
 
 void Contour::SetParity(int parity)
 {

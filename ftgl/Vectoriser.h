@@ -55,7 +55,7 @@ class Vectoriser {
          *
          * @param glyph The freetype glyph to be processed
          */
-        Vectoriser(const FT_GlyphSlot glyph, unsigned short bezierSteps);
+        Vectoriser(const FT_Outline outline, unsigned short bezierSteps, bool reverse);
 
         /**
          *  Destructor
@@ -105,7 +105,7 @@ class Vectoriser {
          * @param front front outset distance
          * @param back back outset distance
          */
-        void ProcessContours(unsigned short bezierSteps);
+        void ProcessContours(unsigned short bezierSteps, bool reverse);
 
         /**
          * The list of contours in the glyph
