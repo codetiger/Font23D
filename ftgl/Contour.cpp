@@ -29,6 +29,8 @@
 
 #include <math.h>
 
+namespace ftgl {
+
 void Contour::AddPoint(Point point)
 {
     if(pointList.empty() || (point != pointList[pointList.size() - 1]
@@ -221,4 +223,6 @@ Contour::Contour(FT_Vector* contour, char* tags, unsigned int n, unsigned short 
     // If final angle is positive (+2PI), it's an anti-clockwise contour,
     // otherwise (-2PI) it's clockwise.
     clockwise = (angle < 0.0);
+}
+
 }

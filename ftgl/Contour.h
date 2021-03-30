@@ -37,6 +37,8 @@
 
 #include "Point.h"
 
+namespace ftgl {
+
 /**
  * Contour class is a container of points that describe a vector font
  * outline. It is used as a container for the output of the bezier curve
@@ -161,6 +163,8 @@
         bool clockwise;
 
 };
+
+}
 
 #endif // __Contour__
 

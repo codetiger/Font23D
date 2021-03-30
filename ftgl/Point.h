@@ -34,6 +34,8 @@
 #include <ftoutln.h>
 #include <fttrigon.h>
 
+namespace ftgl {
+
 /**
  * Point class is a basic 3-dimensional point or vector.
  */
@@ -264,6 +266,6 @@ class Point {
          */
         double values[3];
 };
-
+}
 
 #endif

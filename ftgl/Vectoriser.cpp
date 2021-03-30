@@ -27,6 +27,8 @@
 
 #include "Vectoriser.h"
 
+namespace ftgl {
+
 Vectoriser::Vectoriser(const FT_GlyphSlot glyph, unsigned short bezierSteps)
 :   contourList(0),
     ftContourCount(0),
@@ -161,4 +163,4 @@ const Contour* const Vectoriser::GetContour(size_t index) const
     return (index < ContourCount()) ? contourList[index] : NULL;
 }
 
-
+}

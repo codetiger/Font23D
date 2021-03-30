@@ -6,29 +6,30 @@ Install the dependancies
 
 ```sh
 sudo apt install libfreetype6-dev
-sudo apt install freeglut3-dev
 ```
-Now just run the bash script to get the 3d preview. 
+
+Now just run the bash script to get the OBJ file output. 
 ```sh
 sh compile.sh
 ```
 
 ## Sample Outputs
 Below outputs are generated using different fonts
-![Screenshot Font23D with Coolveticarg Font](screenshots/coolveticarg.gif)
-![Screenshot Font23D with HP Font](screenshots/hp-font.gif)
-![Screenshot Font23D with Hursheys Font](screenshots/hursheys.gif)
+![Screenshot Font23D with Coolveticarg Font](screenshots/coolveticarg.png)
+![Screenshot Font23D with HP Font](screenshots/hp-font.png)
+![Screenshot Font23D with Hursheys Font](screenshots/hursheys.png)
 
 Instruction to use:
 * The Library uses FreeType Library to decode the fonts and converts the Text into Vector.
 * Then the vector data is converted into triangles using Ploy2Tri library.
 * This gives us the triangles of the complete text in a plane.
 * The plane is then extruded into 3d object and then creates a closed mesh.
-* The Mesh is then rendered using OpenGL.
+* The Mesh is then saved as OBJ file.
 
 Plans for Future:
-* Allow Option to export the Mesh into OBJ file.
-* Add Support for Unicode text.
+* Add support for beveled text.
+* Add support for Unicode text.
 
 Contributions:
 * Thanks to J.Scheurich from [White Dune Project](http://wdune.ourproject.org/) for suggesting fixes for Face culling.
+* Thanks to DaegyuMin for fixing a bug in missing triangle.

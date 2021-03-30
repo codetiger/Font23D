@@ -27,6 +27,8 @@
 #include <math.h>
 #include "Point.h"
 
+namespace ftgl {
+
 bool operator == (const Point &a, const Point &b)
 {
     return((a.values[0] == b.values[0]) && (a.values[1] == b.values[1]) && (a.values[2] == b.values[2]));
@@ -53,3 +55,4 @@ Point Point::Normalise()
     return temp;
 }
 
+}

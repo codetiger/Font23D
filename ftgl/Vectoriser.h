@@ -32,6 +32,7 @@
 
 #include "Contour.h"
 
+namespace ftgl {
 
 const double FTGL_FRONT_FACING = 1.0;
 const double FTGL_BACK_FACING = -1.0;
@@ -126,5 +127,7 @@ class Vectoriser {
          */
         FT_Outline outline;
 };
+
+}
 
 #endif  //  __Vectoriser__
