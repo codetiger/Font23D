@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 struct Vertex {
 	float x, y, z;
@@ -66,7 +67,7 @@ struct Mesh {
         printf("Index Count: %d\n", (int)indices.size());
     }
 
-    void saveOBJ(char* filename) {
+    void saveOBJ(const char* filename) {
         std::ofstream objFile(filename);
 
         for (int i = 0; i < vertices.size(); i++)
@@ -77,4 +78,17 @@ struct Mesh {
 
         objFile.close();
     }
+
+    std::string getOBJData() {
+        std::stringstream objData("");
+
+        for (int i = 0; i < vertices.size(); i++)
+            objData << "v " << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << "\n";
+
+        for (int i = 0; i < indices.size(); i+=3)
+            objData << "f " << indices[i] << " " << indices[i+1] << " " << indices[i+2] << "\n";
+
+        return objData.str();
+    }
+
 };

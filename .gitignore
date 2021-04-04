@@ -34,3 +34,7 @@
 .DS_Store
 .vscode
 .github
+/webassembly/freetype
+/webassembly/freetype-tmp
+/webassembly/build
+/webassembly/fonts
