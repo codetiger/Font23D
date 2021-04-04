@@ -1,6 +1,8 @@
 # Font23D
 Font23D is a C++ library for creating a 3d mesh of any Text in the given True type font.
 
+Demo: [Font23D running on browser using webassembly](https://codetiger.github.io/Font23D/webassembly/)
+
 ## Compile the code
 Install the dependancies 
 
