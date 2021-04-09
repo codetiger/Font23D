@@ -187,9 +187,6 @@ void Contour::SetParity(int parity)
 Contour::Contour(FT_Vector* contour, char* tags, unsigned int n, unsigned short bezierSteps)
 {
     Point prev, cur(contour[(n - 1) % n]), next(contour[0]);
-    Point a, b = next - cur;
-    double olddir, dir = atan2((next - cur).Y(), (next - cur).X());
-    double angle = 0.0;
 
     minx = 65000.0f;
     miny = 65000.0f;
@@ -202,14 +199,6 @@ Contour::Contour(FT_Vector* contour, char* tags, unsigned int n, unsigned short 
         prev = cur;
         cur = next;
         next = Point(contour[(i + 1) % n]);
-        olddir = dir;
-        dir = atan2((next - cur).Y(), (next - cur).X());
-
-        // Compute our path's new direction.
-        double t = dir - olddir;
-        if(t < -M_PI) t += 2 * M_PI;
-        if(t > M_PI) t -= 2 * M_PI;
-        angle += t;
 
         // Only process point tags we know.
         if(n < 2 || FT_CURVE_TAG(tags[i]) == FT_Curve_Tag_On)
@@ -244,9 +233,23 @@ Contour::Contour(FT_Vector* contour, char* tags, unsigned int n, unsigned short 
         }
     }
 
-    // If final angle is positive (+2PI), it's an anti-clockwise contour,
-    // otherwise (-2PI) it's clockwise.
-    clockwise = (angle < 0.0);
+    // Calculate contour direction
+    double signedArea = 0.0;
+
+    prev = Point(contour[n - 1]);
+    for (unsigned int i = 0; i < n; i++)
+    {
+        cur = Point(contour[i]);
+
+        double area = cur.X() * prev.Y() - cur.Y() * prev.X();
+        signedArea += area;
+
+        prev = cur;
+    }
+
+    // If the final signed area is positive, it's a clockwise contour,
+    // otherwise it's anti-clockwise.
+    clockwise = signedArea > 0.0f;
 }
 
 }
