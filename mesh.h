@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 struct Vertex {
 	float x, y, z;
@@ -64,11 +65,12 @@ struct Mesh {
 
     void print(){
         printf("Vertex Count: %d\n", (int)vertices.size());
-        printf("Index Count: %d\n", (int)indices.size());
+        printf("Triangle Count: %d\n", (int)indices.size()/3);
     }
 
     void saveOBJ(const char* filename) {
         std::ofstream objFile(filename);
+        objFile << std::scientific;
 
         for (int i = 0; i < vertices.size(); i++)
             objFile << "v " << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << "\n";
@@ -77,6 +79,36 @@ struct Mesh {
             objFile << "f " << indices[i] << " " << indices[i+1] << " " << indices[i+2] << "\n";
 
         objFile.close();
+    }
+
+    void saveTXT(const char* filename) {
+        std::ofstream txtFile(filename);
+        txtFile << std::scientific;
+
+        txtFile << "3\n3\n\n";
+        txtFile << vertices.size() << "\n";
+
+        for (int i = 0; i < vertices.size(); i++)
+            txtFile << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << "\n";
+
+        txtFile << "\n" << indices.size() / 3 << "\n";
+        for (int i = 0; i < indices.size(); i+=3)
+            txtFile << indices[i]-1 << " " << indices[i+1]-1 << " " << indices[i+2]-1 << "\n";
+
+        txtFile.close();
+    }
+
+    void saveSoup(const char* filename) {
+        std::ofstream soupFile(filename);
+        soupFile << std::scientific;
+
+        for (int i = 0; i < indices.size(); i+=3) {
+           soupFile << vertices[indices[i]-1].x << " " << vertices[indices[i]-1].y << " " << vertices[indices[i]-1].z << "\n";
+           soupFile << vertices[indices[i+1]-1].x << " " << vertices[indices[i+1]-1].y << " " << vertices[indices[i+1]-1].z << "\n";
+           soupFile << vertices[indices[i+2]-1].x << " " << vertices[indices[i+2]-1].y << " " << vertices[indices[i+2]-1].z << "\n";
+        }
+
+        soupFile.close();
     }
 
     std::string getOBJData() {
